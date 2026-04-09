@@ -43,7 +43,11 @@ public class ManejadorOfertasSkeleton implements ManejadorOfertasStub{
             }
 
             Product product = fpers.getMapaProductosSolicitados().get(codprod);
-            if (product != null && monto < product.setStartPrice()) {
+            if (product == null) {
+                return;
+            }
+
+            if (monto < product.getStartPrice()) {
                 return;
             }
 
@@ -58,7 +62,7 @@ public class ManejadorOfertasSkeleton implements ManejadorOfertasStub{
             else{
                 int ofertasActuales=fpers.getMapaOfertasRecibidas().get(codprod);
                 fpers.getMapaOfertasRecibidas().put(codprod,ofertasActuales+1);
-                if (fpers.getMapaMontosAsignados().get(codprod)>monto){
+                if (fpers.getMapaMontosAsignados().get(codprod) < monto){
                     fpers.getMapaMontosAsignados().put(codprod, monto);
                     fpers.getMapaOferentesAsignados().put(codprod, codOferente);
                 }
@@ -76,7 +80,7 @@ public class ManejadorOfertasSkeleton implements ManejadorOfertasStub{
 
                 if (messageProducer != null) {
                     try {
-                        messageProducer.sendMessages(new WinnerNotification(winnerCode, codprod));
+                        messageProducer.sendWinnerNotification(new WinnerNotification(winnerCode, codprod));
                     } catch (AmqpException ex) {
                         throw new RuntimeException("No fue posible notificar ganador para " + codprod, ex);
                     }

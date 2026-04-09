@@ -32,6 +32,8 @@
     <!-- obtain admin rights to create the an exchange -->
     <rabbit:admin connection-factory="connectionFactory" />
 
+    <rabbit:topic-exchange id="auctionExchange" name="QDM-EXCHANGE" />
+
     <!-- create a bean which can send message to TUTORIAL_EXCHANGE for the Java program to call -->
     <rabbit:template id="producerTemplate" connection-factory="connectionFactory"  exchange="QDM-EXCHANGE"/>
 

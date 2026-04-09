@@ -33,7 +33,7 @@ public class OffertMessageListener implements MessageListener {
                 Product receivedProduct = (Product) receivedObject;
                 System.out.println("Comprador #" + IdentityGenerator.actualIdentity + " recibió: " + receivedProduct.getCode());
 
-                int montoOferta = receivedProduct.setStartPrice() + rand.nextInt(1000000);
+                int montoOferta = receivedProduct.getStartPrice() + rand.nextInt(1000000);
                 manejadorOfertasStub.agregarOferta(IdentityGenerator.actualIdentity, receivedProduct.getCode(), montoOferta);
                 System.out.println("Comprador #" + IdentityGenerator.actualIdentity + " ofertó: " + montoOferta + " por " + receivedProduct.getCode());
             } else if (receivedObject instanceof WinnerNotification) {

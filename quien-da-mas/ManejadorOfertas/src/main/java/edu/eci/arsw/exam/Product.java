@@ -40,6 +40,10 @@ public class Product implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public int getStartPrice() {
+        return startPrice;
+    }
     
     public int setStartPrice() {
         return startPrice;

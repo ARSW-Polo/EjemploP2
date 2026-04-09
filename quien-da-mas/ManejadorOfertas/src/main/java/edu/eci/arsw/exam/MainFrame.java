@@ -195,7 +195,7 @@ public class MainFrame extends javax.swing.JFrame {
             Product ts=new Product(productCode, description, startPrice);
             
             //enviar un evento para notificar de la tarea disponible
-            mproducer.sendMessages(ts);
+            mproducer.sendProductAnnouncement(ts);
             
             //guardar los detalles de la tarea solicitada.
             fpers.getMapaProductosSolicitados().put(productCode, ts);
