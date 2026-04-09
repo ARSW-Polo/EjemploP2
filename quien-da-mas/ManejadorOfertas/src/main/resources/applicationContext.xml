@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xmlns:p="http://www.springframework.org/schema/p"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+          http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd">
+
+    <!--RMI configuration-->
+    
+    <bean id="manejadorOfertasSkeleton" class="edu.eci.arsw.exam.remote.ManejadorOfertasSkeleton">
+        <property name="fachadaPersistenciaOfertas" ref="fachadaPersistenciaOfertas" />
+        <property name="messageProducer" ref="producer" />
+        <property name="mainFrame" ref="mainFrame" />
+    </bean>
+    
+    <bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+        <property name="serviceName" value="servicioManejoOfertas"/>
+        <property name="service" ref="manejadorOfertasSkeleton"/>
+        <property name="serviceInterface" value="edu.eci.arsw.exam.remote.ManejadorOfertasStub"/>
+        <property name="registryPort" value="1199"/>
+    </bean>    
+
+    <!--  first following line creates a rabbit connection factory with specified parameters -->
+    <rabbit:connection-factory id="connectionFactory" host="localhost" username="guest" password="guest" />
+    <!-- obtain admin rights to create the an exchange -->
+    <rabbit:admin connection-factory="connectionFactory" />
+
+    <!-- create a bean which can send message to TUTORIAL_EXCHANGE for the Java program to call -->
+    <rabbit:template id="producerTemplate" connection-factory="connectionFactory"  exchange="QDM-EXCHANGE"/>
+
+    <bean id="producer" class="edu.eci.arsw.exam.events.OffertMessageProducer">
+	    <property name="amqpTemplate" ref="producerTemplate"></property>
+    </bean>
+
+    <bean id="mainFrame" class="edu.eci.arsw.exam.MainFrame">
+        <property name="messageProducer" ref="producer"/>
+        <property name="fachadaPersistenciaOfertas" ref="fachadaPersistenciaOfertas"/>
+    </bean>
+
+    <bean id="fachadaPersistenciaOfertas" class="edu.eci.arsw.exam.FachadaPersistenciaOfertas" />
+                                                                                      
+</beans>

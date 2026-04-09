@@ -1,0 +1,6 @@
+edu\eci\arsw\exam\remote\ManejadorOfertasStub.class
+edu\eci\arsw\exam\IdentityGenerator.class
+edu\eci\arsw\exam\events\OffertMessageListener.class
+edu\eci\arsw\exam\Main.class
+edu\eci\arsw\exam\WinnerNotification.class
+edu\eci\arsw\exam\Product.class
