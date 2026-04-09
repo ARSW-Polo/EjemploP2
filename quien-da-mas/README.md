@@ -285,3 +285,73 @@ mvn test
 ```
 
 Con esto queda implementado y validado el punto 3 (a, b y c) solicitado en el parcial.
+
+---
+
+## 8. Punto 6 del parcial: Diagrama arquitectura componentes - infraestructura
+
+El siguiente diagrama describe la arquitectura completa de la solucion implementada (componentes y despliegue sobre infraestructura local con Docker + RabbitMQ):
+
+```mermaid
+flowchart LR
+   subgraph DEV[Maquina local de desarrollo]
+      subgraph MO[ManejadorOfertas - JVM]
+         UI[MainFrame\nUI escritorio]
+         SK[ManejadorOfertasSkeleton\nServicio RMI]
+         FP[FachadaPersistenciaOfertas\nEstado de subastas]
+         PR[OffertMessageProducer\nSpring AMQP Publisher]
+         UI --> PR
+         UI --> FP
+         SK --> FP
+         SK --> PR
+      end
+
+      subgraph C1[QuienDaMasApp #1 - JVM]
+         L1[OffertMessageListener]
+         I1[IdentityGenerator]
+         R1[RMI Proxy\nManejadorOfertasStub]
+         L1 --> R1
+         I1 --> L1
+      end
+
+      subgraph C2[QuienDaMasApp #2 - JVM]
+         L2[OffertMessageListener]
+         I2[IdentityGenerator]
+         R2[RMI Proxy\nManejadorOfertasStub]
+         L2 --> R2
+         I2 --> L2
+      end
+
+      subgraph C3[QuienDaMasApp #3 - JVM]
+         L3[OffertMessageListener]
+         I3[IdentityGenerator]
+         R3[RMI Proxy\nManejadorOfertasStub]
+         L3 --> R3
+         I3 --> L3
+      end
+   end
+
+   subgraph DOCKER[Docker]
+      RMQ[RabbitMQ 3-management\nExchange: QDM-EXCHANGE\nRouting Keys: auction.product, auction.winner]
+   end
+
+   UI -. publica Product .-> RMQ
+   SK -. publica WinnerNotification .-> RMQ
+
+   RMQ -. entrega eventos pub/sub .-> L1
+   RMQ -. entrega eventos pub/sub .-> L2
+   RMQ -. entrega eventos pub/sub .-> L3
+
+   R1 -->|agregarOferta(codOferente,codProducto,monto)| SK
+   R2 -->|agregarOferta(codOferente,codProducto,monto)| SK
+   R3 -->|agregarOferta(codOferente,codProducto,monto)| SK
+```
+
+### Flujo de componentes
+
+1. ManejadorOfertas publica un nuevo producto en RabbitMQ (auction.product).
+2. Cada instancia de QuienDaMasApp recibe el evento en su cola anonima y genera una oferta automatica.
+3. Cada comprador invoca remotamente por RMI el metodo agregarOferta en ManejadorOfertas.
+4. El servidor registra solo ofertas validas y, al recibir las primeras 3, determina ganador.
+5. El servidor actualiza la UI con la oferta ganadora y publica WinnerNotification (auction.winner).
+6. Todos los compradores reciben la notificacion, pero solo el ganador imprime el mensaje de compra.
